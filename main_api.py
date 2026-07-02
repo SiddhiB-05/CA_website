@@ -4,7 +4,7 @@ import os
 from datetime import datetime, timezone
 
 import requests
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Header, HTTPException, Query
 from fastapi.staticfiles import StaticFiles
 
 try:
@@ -369,6 +369,31 @@ def get_review_status():
 async def sync_reviews_now(x_api_key: str | None = Header(default=None)):
     if SYNC_API_KEY and x_api_key != SYNC_API_KEY:
         raise HTTPException(status_code=401, detail="Invalid sync API key.")
+    if not database_configured():
+        raise HTTPException(status_code=400, detail="DATABASE_URL is not configured.")
+    if psycopg is None:
+        raise HTTPException(status_code=400, detail="psycopg is not installed.")
+    if not google_configured():
+        raise HTTPException(status_code=400, detail="Google credentials are not configured.")
+
+    try:
+        return await asyncio.to_thread(sync_google_reviews)
+    except requests.HTTPError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.get("/api/reviews/sync-cron")
+async def sync_reviews_from_cron(
+    key: str | None = Query(default=None),
+    x_api_key: str | None = Header(default=None),
+    x_vercel_cron_schedule: str | None = Header(default=None),
+):
+    if SYNC_API_KEY and key != SYNC_API_KEY and x_api_key != SYNC_API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid sync API key.")
+    if not x_vercel_cron_schedule and not key and not x_api_key and SYNC_API_KEY:
+        raise HTTPException(status_code=401, detail="Missing sync API key.")
     if not database_configured():
         raise HTTPException(status_code=400, detail="DATABASE_URL is not configured.")
     if psycopg is None:
