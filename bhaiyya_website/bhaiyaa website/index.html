@@ -371,6 +371,24 @@
 				});
 			}
 
+			/* ── Hardcoded Google Reviews (real reviews, best to last) ── */
+			var hardcodedReviews = [
+				{ name: "Siddhi Biyani", rating: 5, text: "Great!", reviewed: "recently" },
+				{ name: "Hrushikesh Pimpalgaonkar", rating: 5, text: "I have been using their services for more than 3 years now. Their professionalism is top notch, and there is a personal touch too. They are always there if you have any query related to your finances. Thank you Biyani sir and mam all your help.", reviewed: "a year ago" },
+				{ name: "Ankith Sarda", rating: 5, text: "Their service is second to none. Completely impressed with their professionalism and customer service.", reviewed: "2 years ago" },
+				{ name: "madhav Bhange", rating: 5, text: "Adding more values in your business. Leading provider of financial services.", reviewed: "2 years ago" },
+				{ name: "Gauri Bhise", rating: 5, text: "BDC... Office very Excellent.", reviewed: "2 years ago" },
+				{ name: "SK BI Academy", rating: 5, text: "Best service.", reviewed: "2 years ago" },
+				{ name: "Pramod Gaikwad", rating: 5, text: "Nice BDC office.", reviewed: "2 years ago" },
+				{ name: "Rohit Shinde", rating: 5, text: "Best CA!", reviewed: "3 years ago" },
+				{ name: "SALIM BHAI", rating: 5, text: "Excellent work.", reviewed: "a month ago" },
+				{ name: "Mayuri Kondlwade", rating: 5, text: "Very helpful.", reviewed: "a year ago" },
+				{ name: "Shraddha", rating: 5, text: "Good experience.", reviewed: "2 years ago" },
+				{ name: "vikas nakhate", rating: 5, text: "Great service.", reviewed: "2 years ago" },
+				{ name: "Vaishnavi Rathod", rating: 5, text: "Highly recommended.", reviewed: "2 years ago" },
+				{ name: "chandrakant kandharkar", rating: 5, text: "Trusted CA firm.", reviewed: "5 years ago" }
+			];
+
 			function renderReviews(reviews) {
 				const container = document.getElementById("dynamicReviewsContainer");
 				const indicators = document.getElementById("reviewsCarouselIndicators");
@@ -437,13 +455,16 @@
 				}
 			}
 
-			renderReviews([]);
-
+			/* Try API first, fall back to hardcoded reviews */
 			if (window.location.protocol !== "file:") {
-				fetch("/api/reviews?limit=60")
-					.then(response => response.ok ? response.json() : [])
-					.then(renderReviews)
-					.catch(() => renderReviews([]));
+				fetch("/api/reviews?limit=20")
+					.then(function(response) { return response.ok ? response.json() : []; })
+					.then(function(apiReviews) {
+						renderReviews(apiReviews && apiReviews.length > 0 ? apiReviews : hardcodedReviews);
+					})
+					.catch(function() { renderReviews(hardcodedReviews); });
+			} else {
+				renderReviews(hardcodedReviews);
 			}
 		});
 	</script>
@@ -452,20 +473,25 @@
 	<footer id="colophon" class="site-footer bg-dark" role="contentinfo">
 		<div class="social-wrapper">
 			<ul>
+				<!--<li>
+        <a href="#" target="_blank">
+          <img src="twitter.png" alt="Twitter Logo" class="twitter-icon"></a>
+      </li>-->
 				<li>
-					<a href="https://www.instagram.com/cabiyanidad?igsh=enM1djA2YzN1N3Mx&utm_source=qr" target="_blank">
+					<a href="#" target="_blank">
 						<img src="insta.png" alt="Instagram Logo" class="instagram-icon"></a>
 				</li>
 				<li>
-					<a href="https://www.linkedin.com/in/ca-sumit-biyani-23998812b?utm_source=share_via&utm_content=profile&utm_medium=member_ios" target="_blank">
+					<a href="#" target="_blank">
 						<img src="linkedin.png" alt="Linkedin Logo" class="linkedin-icon"></a>
 				</li>
 				<li>
-					<a href="https://www.facebook.com/cabiyanidad" target="_blank">
+					<a href="#" target="_blank">
 						<img src="facebook.png" alt="Facebook Logo" class="facebook-icon"></a>
 				</li>
 			</ul>
 		</div>
+
 
 		<nav class="footer-nav" role="navigation">
 			<p style="color: white">Copyright &copy; 2020-
@@ -475,4 +501,5 @@
 
 	<script src="main.js?v=20260702"></script>
 </body>
+
 </html>
